@@ -44,9 +44,11 @@ var scoreText = arena.append('text')
      .attr('y', 30);
 
 gameData.addScore = function(){
-  scoreBoard.data(gameData.score)
-  .text('hey');
+  gameData.score += 1;
+  scoreText.text(gameData.score);
 };
+
+setInterval(gameData.addScore, 2000);
 
 
 var makeEnemy = function(x, y) {
