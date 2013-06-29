@@ -4,7 +4,7 @@ var board = {
 };
 
 var gameData = {
-  numEnemies: 30,
+  numEnemies: 20,
   highScore: 0,
   score: 0
 };
@@ -15,22 +15,46 @@ var arena = d3.select("#arenaOfDeath")
     .attr("width", board.width)
     .attr("height", board.height);
 
-var drag = d3.behavior.drag()
-    .origin(Object)
-    .on("drag", dragmove);
+// var scoreBoard = arena.append('rect')
+//     .attr('x', board.width-80)
+//     .attr('y', 20)
+//     .attr('width', 70)
+//     .attr('height', 80)
+//     .attr('fill', 'blue')
+//       .append('p')
+//         .attr('width', 30)
+//         .attr('height', 30)
+//         .attr('fill', 'green')
+//         .append('text')
+//           .text('hey')
+//             .attr('x', board.width - 80)
+//             .attr('y', 20);
 
-function dragmove(d) {
-  d3.select(this)
-      .attr("cx", d3.event.x)
-      .attr("cy", d3.event.y);
-}
+
+// var scoreDisplay = arena.append('svg:rect')
+//   .attr('x', board.width - 80)
+//   .attr('y', 30)
+//   .attr('width', 80)
+//   .attr('height', 30)
+//   .attr('opacity',0.10);
+
+var scoreText = arena.append('text')
+     .text(gameData.score)
+     .attr('x', board.width - 85)
+     .attr('y', 30);
+
+gameData.addScore = function(){
+  scoreBoard.data(gameData.score)
+  .text('hey');
+};
+
 
 var makeEnemy = function(x, y) {
   arena.append("svg:circle")
     .attr("cx", x)
     .attr("cy", y)
     .attr('r', 10)
-    .attr('fill', 'red');
+    .attr('fill', 'black');
 };
 
 var moveObject = function(x,y){
@@ -50,12 +74,9 @@ var makePlayer = function() {
     .attr("r", 12)
     .attr("fill", "purple")
     .call(d3.behavior.drag()
-      .on("drag", function(d) {moveObject.call(this);}))
-    .on("mouseover", animate);
-    // .on("drag", function(){
-    //   console.log(d3.mouse(this));
-    // });
+      .on("drag", function(d) {moveObject.call(this);}));
 };
+
 
 var animate = function() {
     d3.select(this).transition()
@@ -75,12 +96,8 @@ for(var i=0; i<gameData.numEnemies; i++) {
 
 var circles = d3.selectAll('circle');
 
-circles.attr('fill', 'green');
 
-var colours = ['red','green','blue','yellow','black','orange'];
-
-
-var move = function(){
+var moveEnemies = function(){
   circles
     .transition()
     .duration(1500)
@@ -89,14 +106,11 @@ var move = function(){
     })
     .attr('cy', function(d, i) {
       return Math.random()*(board.height-10);
-    })
-    .attr('fill', function(d) {
-      return colours[Math.floor(Math.random()*6)];
     });
 };
 
 
 makePlayer();
-setInterval(move, 2000);
+setInterval(moveEnemies, 2000);
 
 // console.log(d3.mouse(arena));
