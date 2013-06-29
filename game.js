@@ -35,6 +35,7 @@ var makeEnemy = function(x, y) {
 
 var moveObject = function(x,y){
   var x = +d3.select(this).attr("cx");
+  console.log(x);
   var y = +d3.select(this).attr("cy");
   x+=d3.event.dx;
   y+=d3.event.dy;
@@ -49,13 +50,20 @@ var makePlayer = function() {
     .attr("r", 12)
     .attr("fill", "purple")
     .call(d3.behavior.drag()
-    .on("drag", function(d) {moveObject.call(this)}));
-    // .on("mouseout", function(){
-    //   d3.select(this).attr("fill", "purple");
-    // })
+      .on("drag", function(d) {moveObject.call(this);}))
+    .on("mouseover", animate);
     // .on("drag", function(){
     //   console.log(d3.mouse(this));
     // });
+};
+
+var animate = function() {
+    d3.select(this).transition()
+        .duration(1000)
+        .attr("r", 10)
+      .transition()
+        .delay(1000)
+        .attr("r", 40);
 };
 
 for(var i=0; i<gameData.numEnemies; i++) {
