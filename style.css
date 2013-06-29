@@ -1,5 +1,41 @@
-.score {
-  color: red;
+.scoreBoard {
   font-size: 16px;
   font-family: arial;
+  text-align: right;
+  float: left;
+}
+
+/*.labels {
+	display: inline;
+}*/
+
+ul {
+  /*display: inline-block;*/
+  padding-top: 10px;
+  margin: 0;
+  float: left;
+  width: 140px;
+}
+
+li {
+  display: inline-block;
+  float: left;
+  padding-left: 5px;
+  /*width: 120px;*/
+}
+
+.scores {
+	display: inline;
+	padding-left: 20px;
+}
+
+#high {
+  color: red;
+}
+
+#arenaOfDeath {
+  border: solid 3px;
+  width: 780px;
+  position: absolute;
+  top: 60px;
 }

@@ -9,25 +9,16 @@ var gameData = {
   score: 0
 };
 
-var playerCircle = {};
-
 var arena = d3.select("#arenaOfDeath")
   .append("svg:svg")
     .attr("width", board.width)
     .attr("height", board.height);
 
-var scoreText = arena.append('text')
-     .text(gameData.score)
-     .attr('x', board.width - 85)
-     .attr('y', 30)
-     .attr('class','score');
+var scoreText = d3.select('#current')
+     .text(gameData.score);
 
-var highScoreText = arena.append('text')
-     .text(gameData.highScore)
-     .attr('x', board.width - 85)
-     .attr('y', 50)
-     .attr('class','score')
-     .attr('fill','red');
+var highScoreText = d3.select('#high')
+     .text(gameData.highScore);
 
 gameData.addScore = function(){
   gameData.score += 1;
@@ -43,8 +34,28 @@ var updateScore = function(){
   gameData.score = 0;
 };
 
-setInterval(gameData.addScore, 50);
+var playerCircle = {};
 
+var makePlayer = function() {
+  playerCircle = arena.append("svg:circle")
+    .attr("cx", board.width/2)
+    .attr("cy", board.height/2)
+    .attr("r", 12)
+    .attr("fill", "blue")
+    .call(d3.behavior.drag()
+      .on("drag", function(d) {moveObject.call(this);}));
+};
+
+var killAnimation = function() {
+    playerCircle.transition()
+        .duration(100)
+        .attr("r", 25)
+        .attr('fill', 'red')
+      .transition()
+        .delay(150)
+        .attr("r", 12)
+        .attr('fill', 'blue');
+};
 
 var makeEnemy = function(x, y) {
   arena.append("svg:circle")
@@ -74,51 +85,17 @@ var distance = function(player, enemy) {
 var checkCollision = function(enemy){
   if(distance(playerCircle, enemy) < 20) {
     updateScore();
+    killAnimation();
   }
 };
 
 var tweenWithCollisionDetection = function(){
-  var endPos, enemy, startPos;
-      enemy = d3.select(this);
-      startPos = {
-        x: parseFloat(enemy.attr('cx')),
-        y: parseFloat(enemy.attr('cy'))
-      };
-      endPos = {
-        x: this.endCX,
-        y: this.endCY
-      };
+      var enemy = d3.select(this);
       return function(t) {
         checkCollision(enemy);
-        // var enemyNextPos;
-        // checkCollision(enemy);
-        // enemyNextPos = {
-        //   x: startPos.x + (endPos.x - startPos.x) * t,
-        //   y: startPos.y + (endPos.y - startPos.y) * t
-        // };
-        // return enemy.attr('cx', enemyNextPos.x).attr('cy', enemyNextPos.y);
       };
 };
 
-var makePlayer = function() {
-  playerCircle = arena.append("svg:circle")
-    .attr("cx", board.width/2)
-    .attr("cy", board.height/2)
-    .attr("r", 12)
-    .attr("fill", "purple")
-    .call(d3.behavior.drag()
-      .on("drag", function(d) {moveObject.call(this);}));
-};
-
-
-var animate = function() {
-    d3.select(this).transition()
-        .duration(1000)
-        .attr("r", 10)
-      .transition()
-        .delay(1000)
-        .attr("r", 40);
-};
 
 for(var i=0; i<gameData.numEnemies; i++) {
   var x = Math.random()*(board.width-10);
@@ -130,8 +107,7 @@ for(var i=0; i<gameData.numEnemies; i++) {
 var enemies = d3.selectAll('circle');
 
 var moveEnemies = function(){
-  enemies
-    .transition()
+  enemies.transition()
     .duration(3000)
     .attr('cx', function(d) {
       this.endCX = Math.random()*(board.width-10);
@@ -144,8 +120,8 @@ var moveEnemies = function(){
     .tween('custom', tweenWithCollisionDetection);
 };
 
-
 makePlayer();
+setInterval(gameData.addScore, 50);
 setInterval(moveEnemies, 3000);
 
 // console.log(d3.mouse(arena));
