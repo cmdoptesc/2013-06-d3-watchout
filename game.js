@@ -9,46 +9,41 @@ var gameData = {
   score: 0
 };
 
+var playerCircle = {};
 
 var arena = d3.select("#arenaOfDeath")
   .append("svg:svg")
     .attr("width", board.width)
     .attr("height", board.height);
 
-// var scoreBoard = arena.append('rect')
-//     .attr('x', board.width-80)
-//     .attr('y', 20)
-//     .attr('width', 70)
-//     .attr('height', 80)
-//     .attr('fill', 'blue')
-//       .append('p')
-//         .attr('width', 30)
-//         .attr('height', 30)
-//         .attr('fill', 'green')
-//         .append('text')
-//           .text('hey')
-//             .attr('x', board.width - 80)
-//             .attr('y', 20);
-
-
-// var scoreDisplay = arena.append('svg:rect')
-//   .attr('x', board.width - 80)
-//   .attr('y', 30)
-//   .attr('width', 80)
-//   .attr('height', 30)
-//   .attr('opacity',0.10);
-
 var scoreText = arena.append('text')
      .text(gameData.score)
      .attr('x', board.width - 85)
-     .attr('y', 30);
+     .attr('y', 30)
+     .attr('class','score');
+
+var highScoreText = arena.append('text')
+     .text(gameData.highScore)
+     .attr('x', board.width - 85)
+     .attr('y', 50)
+     .attr('class','score')
+     .attr('fill','red');
 
 gameData.addScore = function(){
   gameData.score += 1;
   scoreText.text(gameData.score);
 };
 
-setInterval(gameData.addScore, 2000);
+var updateScore = function(){
+  if(gameData.score>gameData.highScore) {
+    console.log(gameData.score);
+    gameData.highScore = gameData.score;
+    highScoreText.text(gameData.highScore);
+  }
+  gameData.score = 0;
+};
+
+setInterval(gameData.addScore, 50);
 
 
 var makeEnemy = function(x, y) {
@@ -61,7 +56,6 @@ var makeEnemy = function(x, y) {
 
 var moveObject = function(x,y){
   var x = +d3.select(this).attr("cx");
-  console.log(x);
   var y = +d3.select(this).attr("cy");
   x+=d3.event.dx;
   y+=d3.event.dy;
@@ -69,8 +63,45 @@ var moveObject = function(x,y){
   d3.select(this).attr('cy', y);
 };
 
+var distance = function(player, enemy) {
+  var dx = player.attr('cx') - enemy.attr('cx');
+  var dy = player.attr('cy') - enemy.attr('cy');
+  dx = dx * dx;
+  dy = dy * dy;
+  return Math.sqrt( dx + dy );
+};
+
+var checkCollision = function(enemy){
+  if(distance(playerCircle, enemy) < 20) {
+    updateScore();
+  }
+};
+
+var tweenWithCollisionDetection = function(){
+  var endPos, enemy, startPos;
+      enemy = d3.select(this);
+      startPos = {
+        x: parseFloat(enemy.attr('cx')),
+        y: parseFloat(enemy.attr('cy'))
+      };
+      endPos = {
+        x: this.endCX,
+        y: this.endCY
+      };
+      return function(t) {
+        checkCollision(enemy);
+        // var enemyNextPos;
+        // checkCollision(enemy);
+        // enemyNextPos = {
+        //   x: startPos.x + (endPos.x - startPos.x) * t,
+        //   y: startPos.y + (endPos.y - startPos.y) * t
+        // };
+        // return enemy.attr('cx', enemyNextPos.x).attr('cy', enemyNextPos.y);
+      };
+};
+
 var makePlayer = function() {
-  arena.append("svg:circle")
+  playerCircle = arena.append("svg:circle")
     .attr("cx", board.width/2)
     .attr("cy", board.height/2)
     .attr("r", 12)
@@ -96,23 +127,25 @@ for(var i=0; i<gameData.numEnemies; i++) {
   makeEnemy(x,y);
 }
 
-var circles = d3.selectAll('circle');
-
+var enemies = d3.selectAll('circle');
 
 var moveEnemies = function(){
-  circles
+  enemies
     .transition()
-    .duration(1500)
+    .duration(3000)
     .attr('cx', function(d) {
-      return Math.random()*(board.width-10);
+      this.endCX = Math.random()*(board.width-10);
+      return this.endCX;
     })
     .attr('cy', function(d, i) {
-      return Math.random()*(board.height-10);
-    });
+      this.endCY = Math.random()*(board.height-10);
+      return this.endCY;
+    })
+    .tween('custom', tweenWithCollisionDetection);
 };
 
 
 makePlayer();
-setInterval(moveEnemies, 2000);
+setInterval(moveEnemies, 3000);
 
 // console.log(d3.mouse(arena));
